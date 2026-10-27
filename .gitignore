@@ -1,0 +1,29 @@
+# Учебные материалы, не относящиеся к коду проекта
+/отчет/
+/титульные листы/
+/docs/
+/graphify-out/
+/uml/old/
+
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+
+# Node.js
+node_modules/
+frontend/dist/
+
+# .NET (готовый start.exe лежит в корне)
+launcher/bin/
+launcher/obj/
+launcher/publish/
+
+# Редакторы и ОС
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+~$*
