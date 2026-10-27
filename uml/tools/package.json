@@ -1,0 +1,8 @@
+{
+  "name": "cosmodino-uml-tools",
+  "private": true,
+  "description": "Перевод SVG-диаграмм Graphviz в PNG через Microsoft Edge",
+  "dependencies": {
+    "puppeteer-core": "^25.16.0"
+  }
+}

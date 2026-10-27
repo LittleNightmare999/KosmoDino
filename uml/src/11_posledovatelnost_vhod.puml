@@ -1,0 +1,90 @@
+@startuml
+' UML. Диаграмма последовательности «Регистрация и вход».
+' Сплошная стрелка — синхронный вызов, пунктирная — возврат; прямоугольник на линии жизни — активация.
+!include _style.iuml
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+skinparam maxMessageSize 190
+title Диаграмма последовательности «Регистрация и вход»
+autonumber "<b>0."
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Гость" as U
+participant ":ФормаВхода\n(React)" as UI
+participant ":КонтекстАвторизации" as Ctx
+participant ":МаршрутизаторAuth\n(FastAPI)" as R
+participant ":Безопасность" as Sec
+database ":БД PostgreSQL" as DB
+
+== Регистрация ==
+U -> UI : ввести логин, почту, пароль
+activate UI
+UI -> Ctx : register(данные)
+activate Ctx
+Ctx -> R : POST /api/auth/register
+activate R
+R -> R : проверить формат данных
+R -> DB : найти пользователя по логину и почте
+activate DB
+DB --> R : результат поиска
+deactivate DB
+alt логин или почта заняты
+  R --> Ctx : 409 «пользователь уже есть»
+  Ctx --> UI : ошибка
+  UI --> U : сообщение об ошибке
+else свободны
+  R -> Sec : hash_password(пароль)
+  activate Sec
+  Sec --> R : хеш PBKDF2
+  deactivate Sec
+  R -> DB : создать пользователя (роль «читатель»), запись журнала
+  activate DB
+  DB --> R : код пользователя
+  deactivate DB
+  R -> Sec : create_access_token(код, роль)
+  activate Sec
+  Sec --> R : токен JWT
+  deactivate Sec
+  R --> Ctx : 201 токен, профиль
+  Ctx -> Ctx : сохранить токен
+  Ctx --> UI : профиль
+  UI --> U : переход в личный кабинет
+end
+deactivate R
+deactivate Ctx
+deactivate UI
+
+== Вход ==
+U -> UI : ввести логин и пароль
+activate UI
+UI -> Ctx : login(логин, пароль)
+activate Ctx
+Ctx -> R : POST /api/auth/login
+activate R
+R -> DB : найти пользователя
+activate DB
+DB --> R : пользователь
+deactivate DB
+R -> Sec : verify_password(пароль, хеш)
+activate Sec
+Sec --> R : верен / неверен
+deactivate Sec
+alt пароль неверен
+  R --> Ctx : 401 «неверный логин или пароль»
+else учётная запись заблокирована
+  R --> Ctx : 403 «учётная запись заблокирована»
+else успех
+  R -> DB : обновить дату последнего входа
+  R -> Sec : create_access_token(код, роль)
+  activate Sec
+  Sec --> R : токен JWT
+  deactivate Sec
+  R --> Ctx : 200 токен, профиль
+  Ctx --> UI : профиль
+  UI --> U : переход по роли: /admin, /editor или /me
+end
+deactivate R
+deactivate Ctx
+deactivate UI
+@enduml

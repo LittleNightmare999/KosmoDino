@@ -1,0 +1,79 @@
+@startuml
+' UML. Диаграмма последовательности «Отправка статьи на рецензию и её рецензирование».
+!include _style.iuml
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+skinparam maxMessageSize 190
+title Диаграмма последовательности «Рецензирование статьи»
+autonumber "<b>0."
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Редактор" as E
+actor "Администратор" as A
+participant ":РедакторСтатьи\n(React)" as EUI
+participant ":ОчередьРецензий\n(React)" as AUI
+participant ":МаршрутизаторыAPI\n(FastAPI)" as R
+participant ":СлужбаСтатей" as S
+participant ":КэшЧтений" as C
+database ":БД PostgreSQL" as DB
+
+E -> EUI : «Отправить на рецензию»
+activate EUI
+EUI -> R : POST .../{slug}/submit
+activate R
+R -> S : изменитьСостояние(статья,\n«на рецензии», редактор)
+activate S
+S -> S : переходДопустим(черновик,\nна рецензии, редактор)
+alt переход недопустим или статья чужая
+  S --> R : отказ 409 / 403 с причиной
+  R --> EUI : ошибка
+  EUI --> E : причина отказа
+else допустим
+  S -> DB : обновить состояние, запись журнала
+  activate DB
+  DB --> S : готово
+  deactivate DB
+  S -> C : сбросить()
+  S --> R : статья «на рецензии»
+  R --> EUI : 200
+  EUI --> E : состояние «на рецензии»
+end
+deactivate S
+deactivate R
+deactivate EUI
+
+A -> AUI : открыть очередь рецензирования
+activate AUI
+AUI -> R : GET .../articles?status=pending
+activate R
+R -> DB : выбрать статьи «на рецензии»
+activate DB
+DB --> R : список
+deactivate DB
+R --> AUI : список статей
+deactivate R
+AUI --> A : очередь
+
+alt статья соответствует требованиям
+  A -> AUI : «Опубликовать»
+  AUI -> R : POST .../review\n{approve: true}
+  activate R
+  R -> S : изменитьСостояние(статья,\n«опубликована», администратор)
+  activate S
+  S -> DB : состояние, дата публикации,\nзапись журнала
+else не соответствует
+  A -> AUI : замечание, «Отклонить»
+  AUI -> R : POST .../review\n{approve: false, note}
+  R -> R : замечание не пустое, иначе 422
+  R -> S : изменитьСостояние(статья,\n«отклонена», администратор, замечание)
+  S -> DB : состояние, замечание, запись журнала
+end
+S -> C : сбросить()
+S --> R : статья в новом состоянии
+deactivate S
+R --> AUI : 200
+deactivate R
+AUI --> A : очередь обновлена
+deactivate AUI
+@enduml

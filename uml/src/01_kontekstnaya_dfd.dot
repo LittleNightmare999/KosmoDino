@@ -1,0 +1,29 @@
+// ЛР 3. Контекстная диаграмма потоков данных (нотация Йордана — ДеМарко)
+digraph context {
+  graph [rankdir=TB, fontname="DejaVu Sans", fontsize=16, labelloc=t, nodesep=1.2, ranksep=1.1, pad=0.3,
+         label="Контекстная диаграмма системы «КосмоДино»"];
+  node  [fontname="DejaVu Sans", fontsize=13, style=filled, fillcolor="#F2F2F2", color="#333333", penwidth=1.4];
+  edge  [fontname="DejaVu Sans", fontsize=11, color="#333333", fontcolor="#1F3F2A", arrowsize=0.8];
+
+  subgraph cluster_l { style=invis;
+    guest  [shape=box, label="Гость", width=2.2, height=0.8];
+    reader [shape=box, label="Читатель", width=2.2, height=0.8];
+  }
+  sys [shape=ellipse, label="0\nКосмоДино:\nинтерактивная энциклопедия\nкосмоса и динозавров", fillcolor="#E3EFDF", width=4.2, height=2.0];
+  subgraph cluster_r { style=invis;
+    editor [shape=box, label="Редактор", width=2.2, height=0.8];
+    admin  [shape=box, label="Администратор", width=2.2, height=0.8];
+  }
+
+  guest  -> sys [label="поисковый запрос,\nданные регистрации"];
+  sys    -> guest [label="статьи, хронология,\nграф связей"];
+  reader -> sys [label="комментарий, закладка,\nответы викторины"];
+  sys    -> reader [label="результат викторины,\nсписок закладок"];
+
+  // снизу: направление записи «система → внешняя сущность» ставит сущность ниже,
+  // а dir=back показывает фактическое направление потока
+  sys -> editor [label="замечание рецензента,\nсостояние статьи"];
+  sys -> editor [dir=back, label="текст статьи, факты,\nсвязи, вопросы"];
+  sys -> admin  [label="очередь рецензирования,\nстатистика, журнал"];
+  sys -> admin  [dir=back, label="решение по статье,\nроль пользователя,\nрешение по комментарию"];
+}

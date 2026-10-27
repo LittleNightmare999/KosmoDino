@@ -1,0 +1,67 @@
+// UML. Диаграмма деятельности «Подготовка и публикация статьи» с суперсостоянием
+// (составной деятельностью) «Работа над статьёй». Ответственный за действие указан
+// в скобках над его названием (обозначение раздела UML).
+// Переход «статья удалена администратором» изображён один раз от границы суперсостояния
+// и прерывает его из любого вложенного действия (ср. рисунок 6 методических указаний № 4).
+digraph activity {
+  graph [rankdir=TB, compound=true, fontname="DejaVu Sans", fontsize=20, labelloc=t, pad=0.4,
+         nodesep=0.5, ranksep=0.2, label="Диаграмма деятельности «Подготовка и публикация статьи»"];
+  node  [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#F2F2F2",
+         color="#222222", penwidth=1.4, width=3.0, height=0.52];
+  edge  [fontname="DejaVu Sans", fontsize=11, color="#222222", arrowsize=0.8, penwidth=1.2];
+
+  start [shape=circle, label="", width=0.28, height=0.28, style=filled, fillcolor="#222222"];
+  open  [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Открыть форму новой статьи>];
+
+  subgraph cluster_work {
+    label="РАБОТА НАД СТАТЬЁЙ  (суперсостояние)"; labeljust=l; fontsize=14; fontcolor="#1F3F2A";
+    style="dashed,rounded,filled"; fillcolor="#EEF5EB"; color="#2E6A44"; penwidth=1.8; margin=12;
+    w1 [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Ввести заголовок, описание и текст>];
+    w2 [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Заполнить карточку фактов и теги>];
+    w3 [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Связать с другими статьями,<BR/>добавить вопросы викторины>, height=0.8];
+    w4 [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Проверить предпросмотр>];
+    wd [shape=diamond, style=filled, fillcolor="#FFFFFF", label="", width=0.5, height=0.5];
+  }
+  killed [shape=circle, label="×", fontsize=18, width=0.36, height=0.36, style=filled, fillcolor="#FFFFFF"];
+
+  save  [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Сохранить черновик и ревизию>, fillcolor="#E3EFDF"];
+  send  [label=<<FONT POINT-SIZE="10"><I>(Редактор)</I></FONT><BR/>Отправить статью на рецензию>];
+  chk   [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Проверить допустимость перехода>, fillcolor="#E3EFDF"];
+  cd    [shape=diamond, style=filled, fillcolor="#FFFFFF", label="", width=0.5, height=0.5];
+  deny  [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Сообщить причину отказа>, fillcolor="#E3EFDF", width=2.6];
+  toRev [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Перевести в состояние «на рецензии»>, fillcolor="#E3EFDF"];
+  review [label=<<FONT POINT-SIZE="10"><I>(Администратор)</I></FONT><BR/>Проверить статью>];
+  ad    [shape=diamond, style=filled, fillcolor="#FFFFFF", label="", width=0.5, height=0.5];
+  note  [label=<<FONT POINT-SIZE="10"><I>(Администратор)</I></FONT><BR/>Указать замечание для автора>, width=2.8];
+  rej   [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Отклонить статью,<BR/>сохранить замечание>, fillcolor="#E3EFDF", width=2.8, height=0.8];
+  approve [label=<<FONT POINT-SIZE="10"><I>(Администратор)</I></FONT><BR/>Одобрить публикацию>];
+  pub   [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Перевести в состояние «опубликована»>, fillcolor="#E3EFDF"];
+  fork  [shape=box, style=filled, fillcolor="#222222", label="", width=3.6, height=0.07];
+  log   [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Записать действие в журнал>, fillcolor="#E3EFDF", width=2.6];
+  cache [label=<<FONT POINT-SIZE="10"><I>(Система)</I></FONT><BR/>Сбросить кэш чтений>, fillcolor="#E3EFDF", width=2.6];
+  join  [shape=box, style=filled, fillcolor="#222222", label="", width=3.6, height=0.07];
+  final [shape=doublecircle, label="", width=0.22, height=0.22, style=filled, fillcolor="#222222"];
+
+  start -> open -> w1;
+  w1 -> w2 -> w3 -> w4 -> wd;
+  wd -> w1 [label="[нужны\nправки]", constraint=false];
+  wd -> save [xlabel="[статья готова]  ", ltail=cluster_work];
+  save -> send -> chk -> cd;
+  cd -> toRev [xlabel="[допустим]  "];
+  cd -> deny [label="[недопустим]"];
+  { rank=same; cd; deny; }
+  deny -> w2 [lhead=cluster_work, constraint=false, xlabel="исправить"];
+  toRev -> review -> ad;
+  ad -> approve [xlabel="[соответствует]  "];
+  ad -> note [label="[не соответствует]"];
+  { rank=same; ad; note; }
+  note -> rej;
+  rej -> w3 [lhead=cluster_work, constraint=false, xlabel="доработать"];
+  approve -> pub -> fork;
+  fork -> log; fork -> cache;
+  log -> join; cache -> join;
+  join -> final;
+
+  // единственный переход от границы суперсостояния
+  w2 -> killed [ltail=cluster_work, style=bold, constraint=false, label="статья удалена\nадминистратором"];
+}

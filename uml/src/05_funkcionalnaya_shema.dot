@@ -1,0 +1,36 @@
+// ЛР 5. Функциональная схема (ГОСТ 19.701-90): путь сведений о статье через носители
+// от подготовки до публикации. Символы: терминатор, данные (параллелограмм), процесс,
+// решение, запоминаемые данные с прямым доступом (цилиндр).
+digraph functional {
+  graph [rankdir=TB, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.4, nodesep=0.8, ranksep=0.45,
+         label="Функциональная схема подготовки и публикации статьи"];
+  node  [fontname="DejaVu Sans", fontsize=13, color="#222222", penwidth=1.4, style=filled, fillcolor="#F2F2F2",
+         width=2.9, height=0.75];
+  edge  [fontname="DejaVu Sans", fontsize=12, color="#222222", arrowsize=0.8, penwidth=1.2];
+
+  start [shape=box, style="rounded,filled", label="Начало", width=1.8, height=0.6, fillcolor="#FFFFFF"];
+  inp   [shape=parallelogram, label="Текст статьи,\nфакты, теги"];
+  p1    [shape=box, label="Сохранение черновика\nи ревизии", fillcolor="#E3EFDF"];
+  db    [shape=cylinder, label="Статьи", width=1.8, height=0.9, fillcolor="#DCE7F0"];
+  p2    [shape=box, label="Отправка\nна рецензию", fillcolor="#E3EFDF"];
+  dec   [shape=diamond, label="Статья\nсоответствует\nтребованиям?", width=2.6, height=1.5, fillcolor="#FFFFFF"];
+  p3    [shape=box, label="Отклонение\nс замечанием", fillcolor="#E3EFDF"];
+  out1  [shape=parallelogram, label="Замечание\nрецензента"];
+  p4    [shape=box, label="Публикация статьи", fillcolor="#E3EFDF"];
+  log   [shape=cylinder, label="Журнал\nдействий", width=1.8, height=0.9, fillcolor="#DCE7F0"];
+  out2  [shape=parallelogram, label="Статья в каталоге,\nхронологии и графе"];
+  end   [shape=box, style="rounded,filled", label="Конец", width=1.8, height=0.6, fillcolor="#FFFFFF"];
+
+  start -> inp -> p1 -> p2 -> dec;
+  p1 -> db [dir=both];
+  { rank=same; p1; db; }
+  dec -> p4 [label="  да"];
+  dec -> p3 [taillabel="нет", labeldistance=2.2];
+  { rank=same; dec; p3; }
+  p3 -> out1;
+  out1 -> p1 [label="доработка", constraint=false];
+  p4 -> log;
+  { rank=same; p4; log; }
+  p3 -> log [constraint=false];
+  p4 -> out2 -> end;
+}

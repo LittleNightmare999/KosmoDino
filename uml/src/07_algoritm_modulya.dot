@@ -1,0 +1,56 @@
+// ЛР 7. Схема алгоритма модуля Д2 «Изменить состояние статьи» (services/articles.py,
+// функция change_status) по ГОСТ 19.701-90. Один вход и один выход; при отказе
+// модуль сообщает причину, а не игнорирует ошибку.
+digraph algorithm {
+  graph [rankdir=TB, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.4, nodesep=0.5, ranksep=0.22,
+         splines=ortho, label="Схема алгоритма модуля «Изменить состояние статьи»"];
+  node  [fontname="DejaVu Sans", fontsize=12, color="#222222", penwidth=1.4, style=filled, fillcolor="#F2F2F2",
+         shape=box, width=3.2, height=0.55];
+  edge  [fontname="DejaVu Sans", fontsize=12, color="#222222", arrowsize=0.75, penwidth=1.2];
+
+  start [style="rounded,filled", fillcolor="#FFFFFF", label="Начало", width=1.9, height=0.55];
+  inp   [shape=parallelogram, label="Статья, новое состояние,\nпользователь, замечание", width=3.6];
+  c1    [shape=diamond, fillcolor="#FFFFFF", label="Переход допустим\nдля роли?", width=2.7, height=1.0];
+  c2    [shape=diamond, fillcolor="#FFFFFF", label="Редактор и\nне автор статьи?", width=2.7, height=1.0];
+  e1    [label="Результат := отказ 409\n«Переход недопустим»", fillcolor="#EADCDC"];
+  e2    [label="Результат := отказ 403\n«Можно отправлять\nтолько свои статьи»", fillcolor="#EADCDC"];
+  s1    [label="Состояние := новое состояние", fillcolor="#E3EFDF"];
+  c3    [shape=diamond, fillcolor="#FFFFFF", label="Публикация и дата\nпубликации не задана?", width=3.0, height=1.05];
+  s2    [label="Дата публикации := текущая дата", fillcolor="#E3EFDF"];
+  c4    [shape=diamond, fillcolor="#FFFFFF", label="Публикация\nили отклонение?", width=2.7, height=1.0];
+  s3    [label="Замечание рецензента := замечание", fillcolor="#E3EFDF"];
+  s4    [label="Записать действие\nв журнал", fillcolor="#E3EFDF"];
+  s5    [label="Зафиксировать транзакцию,\nсбросить кэш чтений", fillcolor="#E3EFDF"];
+  s6    [label="Результат := статья\nв новом состоянии", fillcolor="#E3EFDF"];
+  out   [shape=parallelogram, label="Результат", width=2.4];
+  end   [style="rounded,filled", fillcolor="#FFFFFF", label="Конец", width=1.9, height=0.55];
+
+  j1 [shape=point, width=0.06, label=""];
+  j2 [shape=point, width=0.06, label=""];
+  j3 [shape=point, width=0.06, label=""];
+  j4 [shape=point, width=0.06, label=""];
+
+  start -> inp -> c1;
+  c1 -> c2 [xlabel="да "];
+  c1 -> e1 [xlabel="нет"];
+  { rank=same; c1; e1; }
+  c2 -> s1 [xlabel="нет "];
+  c2 -> e2 [xlabel="да"];
+  { rank=same; c2; e2; }
+  s1 -> c3;
+  c3 -> s2 [xlabel="да"];
+  c3 -> j1 [xlabel="нет", arrowhead=none];
+  { rank=same; c3; j1; }
+  s2 -> j2 [arrowhead=none];
+  j1 -> j2 [arrowhead=none];
+  j2 -> c4;
+  c4 -> s3 [xlabel="да"];
+  c4 -> j3 [xlabel="нет", arrowhead=none];
+  { rank=same; c4; j3; }
+  s3 -> j4 [arrowhead=none];
+  j3 -> j4 [arrowhead=none];
+  j4 -> s4 -> s5 -> s6 -> out;
+  e1 -> out;
+  e2 -> out;
+  out -> end;
+}

@@ -1,0 +1,39 @@
+@startuml
+' UML. Диаграмма развёртывания (размещения): узлы — вычислительные ресурсы,
+' артефакты — развёртываемые файлы, линии связи — протоколы взаимодействия.
+!include _style.iuml
+skinparam defaultFontSize 14
+skinparam ArrowFontSize 13
+title Диаграмма развёртывания системы «КосмоДино»
+skinparam nodesep 30
+skinparam ranksep 40
+
+node "Компьютер пользователя" as PC <<device>> {
+  node "Веб-браузер\n(Chrome, Edge, Firefox)" as Browser <<execution environment>> {
+    artifact "index.html,\nassets/*.js, *.css" as SPA
+  }
+}
+
+node "Сервер приложения" as Server <<device>> {
+  artifact "start.exe" as Launcher
+  node "Python 3.12+ (venv)" as Py <<execution environment>> {
+    node "uvicorn: 4 рабочих процесса" as Uv <<execution environment>> {
+      component "FastAPI-приложение\napp.main:app" as App
+    }
+  }
+  folder "frontend/dist" as Dist
+  node "Docker Engine" as Docker <<execution environment>> {
+    node "Контейнер cosmodino_db" as Cont <<container>> {
+      database "PostgreSQL 16\nencyclopedia,\nencyclopedia_test" as PG
+    }
+    storage "Том pgdata" as Vol
+  }
+}
+
+SPA -- App : HTTP :8000\nREST/JSON + JWT
+App ..> Dist : раздаёт клиент
+App -- PG : TCP :5433\nпул соединений\n(10 + 20 на процесс)
+PG -- Vol : хранение данных
+Launcher ..> Docker : docker compose up -d
+Launcher ..> Uv : запуск,\nобъект задания Windows
+@enduml

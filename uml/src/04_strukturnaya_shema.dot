@@ -1,0 +1,53 @@
+// ЛР 5. Структурная схема (иерархия модулей) серверной части. Транзакционный анализ:
+// модуль 0 — центр обработки запросов, ветви — виды транзакций (группы маршрутов API).
+// Общие модули Д1–Д5 вызываются многими модулями; повторные связи на схеме не дублируются.
+digraph structure {
+  graph [rankdir=TB, splines=ortho, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.4,
+         nodesep=0.35, ranksep=0.35, ordering=out, label="Структурная схема серверной части системы «КосмоДино»"];
+  node  [shape=box, fontname="DejaVu Sans", fontsize=13, style=filled, fillcolor="#F2F2F2",
+         color="#222222", penwidth=1.3, width=1.75, height=0.75];
+  edge  [color="#222222", arrowsize=0.7, penwidth=1.2];
+
+  m0 [label="0\nДиспетчер запросов\n(app.main)", fillcolor="#E3EFDF", width=3.0, height=0.9];
+
+  m1 [group=g1, label="1\nАвторизация"];
+  m2 [group=g2, label="2\nКаталог"];
+  m3 [group=g3, label="3\nРаздел\nчитателя"];
+  m4 [group=g4, label="4\nРедакция"];
+  m5 [group=g5, label="5\nАдминистри-\nрование"];
+
+  m11 [group=g1, label="1.1\nЗарегистри-\nровать"]; m12 [group=g1, label="1.2\nВойти"]; m13 [group=g1, label="1.3\nИзменить\nпрофиль"];
+  m21 [group=g2, label="2.1\nНайти\nстатьи"]; m22 [group=g2, label="2.2\nПоказать\nстатью"]; m23 [group=g2, label="2.3\nПостроить\nхронологию"]; m24 [group=g2, label="2.4\nПостроить\nграф"];
+  m31 [group=g3, label="3.1\nКоммента-\nрии"]; m32 [group=g3, label="3.2\nЗакладки"]; m33 [group=g3, label="3.3\nПроверить\nвикторину"];
+  m41 [group=g4, label="4.1\nСоздать\nстатью"]; m42 [group=g4, label="4.2\nПравить\nстатью"]; m43 [group=g4, label="4.3\nОтправить\nна рецензию"]; m44 [group=g4, label="4.4\nСвязи\nи вопросы"];
+  m51 [group=g5, label="5.1\nРецензиро-\nвать"]; m52 [group=g5, label="5.2\nПользова-\nтели"]; m53 [group=g5, label="5.3\nМодерация\nкомментариев"]; m54 [group=g5, label="5.4\nСтатистика\nи журнал"];
+
+  node [fillcolor="#DCE7F0"];
+  d1 [label="Д1\nПроверка\nдоступа"];
+  d2 [label="Д2\nЖизненный\nцикл статьи"];
+  d3 [label="Д3\nЖурнал\nдействий"];
+  d4 [label="Д4\nКэш\nчтений"];
+  d5 [label="Д5\nБуфер\nпросмотров"];
+  d6 [label="Д6\nДоступ\nк БД"];
+
+  m0 -> {m1 m2 m3 m4 m5};
+  // модули второго уровня стоят столбиком под своей ветвью; линии вызова идут вдоль столбца
+  m1 -> m11; m1 -> m12; m1 -> m13;
+  m2 -> m21; m2 -> m22; m2 -> m23; m2 -> m24;
+  m3 -> m31; m3 -> m32; m3 -> m33;
+  m4 -> m41; m4 -> m42; m4 -> m43; m4 -> m44;
+  m5 -> m51; m5 -> m52; m5 -> m53; m5 -> m54;
+  m11 -> m12 -> m13 [style=invis];
+  m21 -> m22 -> m23 -> m24 [style=invis];
+  m31 -> m32 -> m33 [style=invis];
+  m41 -> m42 -> m43 -> m44 [style=invis];
+  m51 -> m52 -> m53 -> m54 [style=invis];
+
+  // общие модули — отдельной строкой внизу
+  { rank=same; d1; d2; d3; d4; d5; d6; }
+  d1 -> d4 -> d5 -> d6 -> d2 -> d3 [style=invis];
+  m24 -> d1 [style=invis]; m44 -> d2 [style=invis];
+
+  note [shape=plaintext, style="", fontsize=11, label=<<I>Общие модули Д1–Д6 вызываются многими модулями, связи с ними не изображаются:<BR/>Д1 — 1.2, 1.3, 3.x, 4.x, 5.x; Д2 — 4.1–4.3, 5.1; Д3 — 1.1, 4.x, 5.x;<BR/>Д4 — 2.x; Д5 — 2.2; Д6 — все модули. Коэффициент разветвления диспетчера — 5.</I>>];
+  d6 -> note [style=invis];
+}

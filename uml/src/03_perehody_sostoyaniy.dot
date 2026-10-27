@@ -1,0 +1,50 @@
+// ЛР 4. Диаграмма переходов состояний объекта «Статья» с составным (вложенным) состоянием.
+// Подпись перехода: событие [условие] / действие.
+// Переход «удалить» изображён один раз от границы составного состояния и действует
+// из любого вложенного состояния (как на рисунке 6 методических указаний № 4).
+digraph article_states {
+  graph [rankdir=TB, compound=true, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.4,
+         nodesep=1.2, ranksep=0.9,
+         label="Диаграмма переходов состояний объекта «Статья»"];
+  node  [fontname="DejaVu Sans", fontsize=14, shape=box, style="rounded,filled", fillcolor="#F2F2F2",
+         color="#222222", penwidth=1.5, width=2.6, height=0.95];
+  edge  [fontname="DejaVu Sans", fontsize=12, color="#222222", arrowsize=0.85, penwidth=1.3];
+
+  start [shape=circle, label="", width=0.3, height=0.3, style=filled, fillcolor="#222222"];
+  final [shape=doublecircle, label="", width=0.24, height=0.24, style=filled, fillcolor="#222222"];
+
+  subgraph cluster_edit {
+    label="В РЕДАКЦИИ  (составное состояние)";
+    labeljust=l; fontname="DejaVu Sans"; fontsize=15; fontcolor="#1F3F2A";
+    style="dashed,rounded"; color="#2E6A44"; penwidth=1.8; margin=24;
+    draft    [label=<<B>ЧЕРНОВИК</B>>];
+    pending  [label=<<B>НА РЕЦЕНЗИИ</B>>, fillcolor="#E3EFDF"];
+    rejected [label=<<B>ОТКЛОНЕНА</B>>];
+    { rank=same; pending; rejected; }
+  }
+
+  published [label=<<B>ОПУБЛИКОВАНА</B>>, fillcolor="#E3EFDF"];
+  archived  [label=<<B>В АРХИВЕ</B>>];
+  deleted   [label=<<B>УДАЛЕНА</B>>, fillcolor="#FFFFFF"];
+
+  start -> draft [label="создать / сохранить ревизию"];
+  draft -> pending [label="отправить на рецензию\n[автор статьи]\n/ записать в журнал"];
+  pending -> rejected [xlabel="отклонить\n[указано замечание]\n/ сохранить замечание"];
+  rejected -> draft [label="править\n/ сохранить ревизию", constraint=false];
+  rejected -> pending [xlabel="отправить повторно\n[автор статьи]", constraint=false];
+  draft -> draft [label="править\n/ сохранить ревизию"];
+
+  pending -> published [label="одобрить [администратор]\n/ установить дату публикации"];
+  published -> pending [label="править [редактор]\n/ сохранить ревизию"];
+  published -> published [label="править [администратор]\n/ сохранить ревизию"];
+  published -> archived [label="архивировать\n[администратор]"];
+  archived -> published [label="вернуть\n[администратор]"];
+
+  // один переход от границы составного состояния
+  rejected -> deleted [ltail=cluster_edit, label="удалить [администратор]\n/ записать в журнал", style=bold];
+  archived -> deleted [label="удалить [администратор]\n/ записать в журнал"];
+  deleted -> final;
+
+  { rank=same; published; deleted; }
+  { rank=same; archived; final; }
+}

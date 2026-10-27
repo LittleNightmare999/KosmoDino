@@ -1,0 +1,126 @@
+// ЛР 6. Итоговая схема данных после приведения к третьей нормальной форме.
+// Подчёркнуты первичные ключи, курсивом (и синим) — внешние ключи. Стрелка направлена
+// от отношения с внешним ключом к отношению, на которое он ссылается; подпись — тип связи.
+digraph data_schema {
+  graph [rankdir=LR, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.3, nodesep=0.18, ranksep=0.9,
+         label="Схема данных системы «КосмоДино» (третья нормальная форма)"];
+  node  [shape=plaintext, fontname="DejaVu Sans", fontsize=12];
+  edge  [fontname="DejaVu Sans", fontsize=12, fontcolor="#444444", color="#222222", arrowsize=0.8, penwidth=1.2];
+
+  user [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ПОЛЬЗОВАТЕЛЬ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код пользователя</U></TD></TR>
+    <TR><TD ALIGN="LEFT">логин</TD></TR><TR><TD ALIGN="LEFT">электронная почта</TD></TR>
+    <TR><TD ALIGN="LEFT">имя</TD></TR><TR><TD ALIGN="LEFT">хеш пароля</TD></TR>
+    <TR><TD ALIGN="LEFT">роль</TD></TR><TR><TD ALIGN="LEFT">активен</TD></TR>
+    <TR><TD ALIGN="LEFT">дата регистрации</TD></TR></TABLE>>];
+
+  topic [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>РАЗДЕЛ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код раздела</U></TD></TR><TR><TD ALIGN="LEFT">адрес</TD></TR>
+    <TR><TD ALIGN="LEFT">название</TD></TR><TR><TD ALIGN="LEFT">единица шкалы времени</TD></TR></TABLE>>];
+
+  cat [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>КАТЕГОРИЯ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код категории</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код раздела</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">адрес</TD></TR><TR><TD ALIGN="LEFT">название</TD></TR>
+    <TR><TD ALIGN="LEFT">порядок</TD></TR></TABLE>>];
+
+  art [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>СТАТЬЯ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код статьи</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код категории</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код автора</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">адрес</TD></TR><TR><TD ALIGN="LEFT">заголовок</TD></TR>
+    <TR><TD ALIGN="LEFT">краткое описание</TD></TR><TR><TD ALIGN="LEFT">текст</TD></TR>
+    <TR><TD ALIGN="LEFT">состояние</TD></TR><TR><TD ALIGN="LEFT">эпоха, значение на шкале</TD></TR>
+    <TR><TD ALIGN="LEFT">замечание рецензента</TD></TR><TR><TD ALIGN="LEFT">число просмотров</TD></TR>
+    <TR><TD ALIGN="LEFT">дата публикации</TD></TR></TABLE>>];
+
+  fact [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ФАКТ СТАТЬИ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код факта</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">показатель</TD></TR><TR><TD ALIGN="LEFT">значение</TD></TR></TABLE>>];
+
+  tag [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ТЕГ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код тега</U></TD></TR><TR><TD ALIGN="LEFT">название</TD></TR></TABLE>>];
+
+  atag [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ТЕГ СТАТЬИ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></U></TD></TR>
+    <TR><TD ALIGN="LEFT"><U><FONT COLOR="#1F4E8C"><I>код тега</I></FONT></U></TD></TR></TABLE>>];
+
+  link [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>СВЯЗЬ СТАТЕЙ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код связи</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи-источника</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи-цели</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">тип отношения</TD></TR></TABLE>>];
+
+  rev [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>РЕВИЗИЯ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код ревизии</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код редактора</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">заголовок, текст</TD></TR><TR><TD ALIGN="LEFT">комментарий к правке</TD></TR>
+    <TR><TD ALIGN="LEFT">дата правки</TD></TR></TABLE>>];
+
+  com [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>КОММЕНТАРИЙ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код комментария</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код пользователя</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">текст</TD></TR><TR><TD ALIGN="LEFT">видимость</TD></TR>
+    <TR><TD ALIGN="LEFT">дата</TD></TR></TABLE>>];
+
+  bm [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ЗАКЛАДКА</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U><FONT COLOR="#1F4E8C"><I>код пользователя</I></FONT></U></TD></TR>
+    <TR><TD ALIGN="LEFT"><U><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></U></TD></TR>
+    <TR><TD ALIGN="LEFT">дата</TD></TR></TABLE>>];
+
+  qq [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ВОПРОС ВИКТОРИНЫ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код вопроса</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код статьи</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">формулировка</TD></TR><TR><TD ALIGN="LEFT">варианты ответа</TD></TR>
+    <TR><TD ALIGN="LEFT">номер верного варианта</TD></TR><TR><TD ALIGN="LEFT">пояснение</TD></TR></TABLE>>];
+
+  qa [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ПОПЫТКА ВИКТОРИНЫ</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код попытки</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код пользователя</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код раздела</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">верных ответов</TD></TR><TR><TD ALIGN="LEFT">всего вопросов</TD></TR>
+    <TR><TD ALIGN="LEFT">дата</TD></TR></TABLE>>];
+
+  log [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="2" COLOR="#222222">
+    <TR><TD BGCOLOR="#2E4B3A" WIDTH="250"><FONT COLOR="white"><B>ЗАПИСЬ ЖУРНАЛА</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><U>код записи</U></TD></TR>
+    <TR><TD ALIGN="LEFT"><FONT COLOR="#1F4E8C"><I>код пользователя</I></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT">действие</TD></TR><TR><TD ALIGN="LEFT">объект, код объекта</TD></TR>
+    <TR><TD ALIGN="LEFT">подробности</TD></TR><TR><TD ALIGN="LEFT">дата</TD></TR></TABLE>>];
+
+  // справа — справочники, слева — зависимые отношения
+  cat  -> topic [label="M : 1"];
+  art  -> cat   [label="M : 1"];
+  art  -> user  [label="M : 1"];
+  fact -> art   [label="M : 1"];
+  atag -> art   [label="M : 1"];
+  atag -> tag   [label="M : 1"];
+  link -> art   [label="M : 1  (источник)"];
+  link -> art   [label="M : 1  (цель)"];
+  rev  -> art   [label="M : 1"];
+  rev  -> user  [label="M : 1"];
+  com  -> art   [label="M : 1"];
+  com  -> user  [label="M : 1"];
+  bm   -> art   [label="M : 1"];
+  bm   -> user  [label="M : 1"];
+  qq   -> art   [label="M : 1"];
+  qa   -> user  [label="M : 1"];
+  qa   -> topic [label="M : 1"];
+  log  -> user  [label="M : 1"];
+}

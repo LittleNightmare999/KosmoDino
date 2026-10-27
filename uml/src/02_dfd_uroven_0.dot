@@ -1,0 +1,80 @@
+// ЛР 3. Диаграмма потоков данных нулевого уровня (нотация Йордана — ДеМарко)
+// Процессы — скруглённые прямоугольники с номером, внешние сущности — прямоугольники,
+// накопители — открытые справа прямоугольники с номером D.
+// Колонки слева направо: внешние сущности → процессы → накопители. Ребро всегда записано «слева направо»,
+// фактическое направление потока задаёт dir (forward — вправо, back — влево, both — запись и чтение).
+digraph dfd0 {
+  graph [rankdir=LR, fontname="DejaVu Sans", fontsize=18, labelloc=t, pad=0.4, nodesep=0.3, ranksep=1.6,
+         newrank=true, label="Диаграмма потоков данных нулевого уровня системы «КосмоДино»"];
+  node  [fontname="DejaVu Sans", fontsize=13, color="#333333", penwidth=1.4];
+  edge  [fontname="DejaVu Sans", fontsize=11, color="#333333", fontcolor="#1F3F2A", arrowsize=0.8, penwidth=1.1];
+
+  // внешние сущности
+  node [shape=box, style=filled, fillcolor="#F2F2F2", width=2.0, height=0.7];
+  guest  [label="Гость"];
+  reader [label="Читатель"];
+  clock  [label="Таймер\n(каждые 3 с)"];
+  editor [label="Редактор"];
+  admin  [label="Администратор"];
+
+  // процессы
+  node [shape=box, style="rounded,filled", fillcolor="#E3EFDF", width=2.4, height=1.1];
+  p1 [label="1\nРегистрация\nи вход"];
+  p2 [label="2\nПоиск и чтение\nстатей"];
+  p3 [label="3\nОбслуживание\nчитателя"];
+  p6 [label="6\nУчёт\nпросмотров"];
+  p4 [label="4\nПодготовка\nстатей"];
+  p5 [label="5\nРецензирование\nи модерация"];
+  p7 [label="7\nУправление\nпользователями"];
+
+  // накопители
+  node [shape=plaintext, style="", width=0, height=0];
+  d1 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D1</TD><TD SIDES="TB" WIDTH="150">Пользователи</TD></TR></TABLE>>];
+  d3 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D3</TD><TD SIDES="TB" WIDTH="150">Справочники</TD></TR></TABLE>>];
+  d2 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D2</TD><TD SIDES="TB" WIDTH="150">Статьи</TD></TR></TABLE>>];
+  d4 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D4</TD><TD SIDES="TB" WIDTH="150">Комментарии<BR/>и закладки</TD></TR></TABLE>>];
+  d5 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D5</TD><TD SIDES="TB" WIDTH="150">Викторины</TD></TR></TABLE>>];
+  d6 [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7"><TR><TD BGCOLOR="#DDDDDD">D6</TD><TD SIDES="TB" WIDTH="150">Журнал действий</TD></TR></TABLE>>];
+
+  { rank=same; guest; reader; clock; editor; admin; }
+  { rank=same; p1; p2; p3; p6; p4; p5; p7; }
+  { rank=same; d1; d3; d2; d4; d5; d6; }
+  // порядок слева направо
+  guest -> reader -> clock -> editor -> admin [style=invis];
+  p1 -> p2 -> p3 -> p6 -> p4 -> p5 -> p7 [style=invis];
+  d1 -> d3 -> d2 -> d4 -> d5 -> d6 [style=invis];
+
+  // внешние сущности ↔ процессы
+  guest  -> p1 [label="данные\nрегистрации"];
+  reader -> p1 [dir=back, label="токен\nдоступа"];
+  guest  -> p2 [label="поисковый\nзапрос"];
+  guest  -> p2 [dir=back, label="статья, хронология,\nграф"];
+  reader -> p3 [label="комментарий,\nзакладка, ответы"];
+  reader -> p3 [dir=back, label="результат\nвикторины"];
+  clock  -> p6 [label="истёк\nинтервал"];
+  editor -> p4 [label="текст, факты,\nсвязи, вопросы"];
+  editor -> p4 [dir=back, label="состояние\nстатьи"];
+  editor -> p5 [dir=back, label="замечание\nрецензента"];
+  admin  -> p5 [label="решение по статье\nи комментарию"];
+  admin  -> p7 [label="роль,\nблокировка"];
+  admin  -> p7 [dir=back, label="статистика,\nжурнал"];
+
+  // процесс → процесс
+  p2 -> p6 [constraint=false, label="факт\nпросмотра"];
+
+  // процессы ↔ накопители
+  p1 -> d1 [dir=both, label="учётная запись /\nхеш пароля, роль"];
+  p2 -> d3 [dir=back, label="разделы,\nкатегории, теги"];
+  p2 -> d2 [dir=back, label="опубликованные\nстатьи"];
+  p3 -> d4 [label="комментарий,\nзакладка"];
+  p3 -> d5 [dir=both, label="попытка /\nвопросы и ответы"];
+  p6 -> d2 [label="число\nпросмотров"];
+  p4 -> d2 [label="черновик,\nревизия"];
+  p4 -> d5 [label="вопрос\nвикторины"];
+  p4 -> d6 [label="запись\nо правке"];
+  p5 -> d2 [dir=both, label="новое состояние /\nстатьи на рецензии"];
+  p5 -> d4 [label="видимость\nкомментария"];
+  p5 -> d6 [label="запись\nо решении"];
+  p7 -> d1 [dir=both, label="изменённая запись /\nучётные записи"];
+  p7 -> d6 [dir=back, label="журнал"];
+}
